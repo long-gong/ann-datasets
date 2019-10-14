@@ -14,3 +14,7 @@
   - FastText
 + [Tiny Images Dataset](http://horatio.cs.nyu.edu/mit/tiny/data/index.html)
   - GIST
+
+## Notice 
+
+Before using the matlab codes, please first download the datasets. [Here](./Euclidean/README.md) is the instruction.
