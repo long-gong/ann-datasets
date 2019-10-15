@@ -169,7 +169,7 @@ for i=1:floor(N/nbuffer)
     base = bsxfun(@minus, base, learn_mean);
     
     B1 = (W * [base; ones(1, size(base,2))]) > 0;
-    h5write(hdf5_fname_uncompact, base_name, B1', [(i-1)*nbuffer+1, 1], [nbuffer nb]);
+    h5write(hdf5_fname_uncompact, base_name, uint8(B1'), [(i-1)*nbuffer+1, 1], [nbuffer nb]);
     B1 = compactbit(B1, word_size);
     h5write(hdf5_fname, base_name, B1', [(i-1)*nbuffer+1, 1], [nbuffer nb / word_size]);
 end
@@ -189,6 +189,7 @@ if (isempty(query))
 else
     query = bsxfun(@minus, query, learn_mean);
     Q = (W * [query; ones(1, size(query,2))] > 0);
+    h5write_wrapper(hdf5_fname_uncompact, '/test', uint8(Q'), 'Datatype', 'uint8');
     Q = compactbit(Q, word_size );
 end
 
