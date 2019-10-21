@@ -149,8 +149,12 @@ fprintf('Computing %d-bit binary codes...\n', nb);
 hdf5_fname = [outputdir, '/Hamming_mih_', num2str(nb), '_', dataset_name, '.hdf5'];
 hdf5_fname_uncompact = [outputdir, '/Hamming_mih_', num2str(nb), '_', dataset_name, '_uncompact.hdf5'];
 base_name = '/train';
-h5create(hdf5_fname, base_name, [N (nb / word_size)], 'Datatype', data_type);
-h5create(hdf5_fname_uncompact, base_name, [N nb], 'Datatype', 'uint8');
+
+% h5create(hdf5_fname, base_name, [N (nb / word_size)], 'Datatype', data_type);
+% h5create(hdf5_fname_uncompact, base_name, [N nb], 'Datatype', 'uint8');
+
+h5create(hdf5_fname, base_name, [(nb / word_size) N], 'Datatype', data_type);
+h5create(hdf5_fname_uncompact, base_name, [nb N], 'Datatype', 'uint8');
 
 for i=1:floor(N/nbuffer)
     fprintf('%d/%d\r', i, floor(N/nbuffer));
@@ -169,9 +173,9 @@ for i=1:floor(N/nbuffer)
     base = bsxfun(@minus, base, learn_mean);
     
     B1 = (W * [base; ones(1, size(base,2))]) > 0;
-    h5write(hdf5_fname_uncompact, base_name, uint8(B1'), [(i-1)*nbuffer+1, 1], [nbuffer nb]);
+    h5write(hdf5_fname_uncompact, base_name, uint8(B1), [1 (i-1)*nbuffer+1], [nb nbuffer]);
     B1 = compactbit(B1, word_size);
-    h5write(hdf5_fname, base_name, B1', [(i-1)*nbuffer+1, 1], [nbuffer nb / word_size]);
+    h5write(hdf5_fname, base_name, B1, [1 (i-1)*nbuffer+1], [(nb / word_size) nbuffer]);
 end
 
 query = [];
@@ -189,13 +193,11 @@ if (isempty(query))
 else
     query = bsxfun(@minus, query, learn_mean);
     Q = (W * [query; ones(1, size(query,2))] > 0);
-    h5write_wrapper(hdf5_fname_uncompact, '/test', uint8(Q'), 'Datatype', 'uint8');
-    Q = compactbit(Q, word_size );
+    h5write_wrapper(hdf5_fname_uncompact, '/test', uint8(Q), 'Datatype', 'uint8');
+    Q = compactbit(Q, word_size);
+    h5write_wrapper(hdf5_fname, '/test', Q, 'Datatype', data_type);
 end
 
-h5write_wrapper(hdf5_fname, '/test', Q', 'Datatype', data_type);
 clear B Q W;
-info = h5info(hdf5_fname);
-disp(info);
 fprintf('done.\n');
 end
